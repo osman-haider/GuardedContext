@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>GuardedContext — a women's-health AI guardrail layer (research prototype)</title>
+<link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <h1>GuardedContext</h1>
+    <p class="tagline">A small guardrail + multi-provider routing layer for women's-health AI answers.</p>
+    <div class="disclaimer">
+      <strong>What this is:</strong> an independent research prototype built from public research
+      (a published women's-health LLM benchmark and industry safety-consortium coverage — see
+      sources in the accompanying write-up). <strong>What this is not:</strong> it is not affiliated
+      with, connected to, or built on any real company's product or data, and nothing it outputs is
+      medical advice.
+    </div>
+  </header>
+
+  <!-- Passcode gate, shown only if the server reports auth_required -->
+  <section class="card hidden" id="authCard">
+    <h2>Demo access code</h2>
+    <p class="sub">This deployment is passcode-protected to prevent API-cost abuse.</p>
+    <input type="password" id="authCodeInput" placeholder="Enter access code" />
+    <button id="authSubmitBtn">Unlock demo</button>
+    <div class="error-box hidden" id="authError">Incorrect code.</div>
+  </section>
+
+  <div id="mainContent" class="hidden">
+
+    <!-- Single question -->
+    <section class="card">
+      <h2>1 — Ask a single question</h2>
+      <p class="sub">Pick a sample question (styled after real "Ask Saela"-type questions) or write your own.</p>
+
+      <label for="sampleSelect">Sample question</label>
+      <select id="sampleSelect">
+        <option value="">— choose a sample question —</option>
+      </select>
+
+      <label for="customQuestion">Or type your own</label>
+      <textarea id="customQuestion" placeholder="e.g. Why am I so tired this week?"></textarea>
+
+      <button id="evaluateBtn">Evaluate this question</button>
+      <div class="status-line hidden" id="evalStatus">Running classifier → responder → guardrail evaluator…</div>
+      <div class="error-box hidden" id="evalError"></div>
+
+      <div id="resultPanel" class="hidden">
+        <div class="row" style="margin-top:16px;">
+          <div>
+            <label style="margin-top:0;">Risk classification</label>
+            <div><span class="pill none" id="riskPill">—</span> <span id="riskReasoning" style="color:var(--muted); font-size:13px;"></span></div>
+          </div>
+          <div>
+            <label style="margin-top:0;">Final action taken</label>
+            <div><span class="pill" id="actionPill">—</span> <span id="providerUsed" style="color:var(--muted); font-size:13px;"></span></div>
+          </div>
+        </div>
+
+        <div class="answers">
+          <div class="answer-box">
+            <h4>Raw primary answer (before guardrail check)</h4>
+            <div id="rawAnswerText">—</div>
+          </div>
+          <div class="answer-box">
+            <h4>Final answer (what a user would actually see)</h4>
+            <div id="finalAnswerText">—</div>
+          </div>
+        </div>
+
+        <div class="answer-box" style="margin-top:14px;">
+          <h4>Guardrail evaluation (modeled on arXiv:2512.17028's error taxonomy)</h4>
+          <ul class="flags-list" id="flagsList"></ul>
+          <div id="rationaleText" style="margin-top:8px; color:var(--muted); font-size:13px;"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Batch benchmark -->
+    <section class="card">
+      <h2>2 — Run the full sample benchmark</h2>
+      <p class="sub">
+        Runs all 18 curated sample questions live and scores the pipeline against pre-tagged
+        expectations — the same basic idea as the published benchmark's accuracy scoring, at
+        small scale.
+      </p>
+      <button id="runBatchBtn">Run all 18 questions</button>
+      <button class="secondary" id="clearBatchBtn">Clear</button>
+      <div class="status-line hidden" id="batchStatus"></div>
+
+      <div class="scorecard hidden" id="scorecard">
+        <div class="metric"><div class="value" id="metricTotal">0</div><div class="label">Questions run</div></div>
+        <div class="metric"><div class="value" id="metricAccuracy">0%</div><div class="label">Matched expected behavior</div></div>
+        <div class="metric"><div class="value" id="metricFlagged">0</div><div class="label">Guardrail-flagged</div></div>
+        <div class="metric"><div class="value" id="metricFallback">0</div><div class="label">Provider fallback used</div></div>
+        <div class="metric"><div class="value" id="metricSafeTemplate">0</div><div class="label">Safe-template shown</div></div>
+      </div>
+
+      <div class="bars hidden" id="categoryBars"></div>
+
+      <table class="hidden" id="batchTable">
+        <thead>
+          <tr>
+            <th>#</th><th>Question</th><th>Risk</th><th>Expected flag?</th>
+            <th>Flagged?</th><th>Final action</th><th>Match</th>
+          </tr>
+        </thead>
+        <tbody id="batchTableBody"></tbody>
+      </table>
+    </section>
+
+    <!-- History -->
+    <section class="card">
+      <h2>3 — Recent run history</h2>
+      <p class="sub">Every evaluation (single or batch) is logged with an anonymous session ID — never a name or email — as a small nod to identity/health-data separation.</p>
+      <button class="secondary" id="loadHistoryBtn">Refresh history</button>
+      <table class="hidden" id="historyTable">
+        <thead>
+          <tr><th>Time</th><th>Session</th><th>Question</th><th>Risk</th><th>Action</th><th>Flagged?</th></tr>
+        </thead>
+        <tbody id="historyTableBody"></tbody>
+      </table>
+    </section>
+
+  </div>
+
+  <p class="footer-note">
+    GuardedContext — built as an application demo. Not medical advice. Not affiliated with Saela
+    or any other named company.
+  </p>
+</div>
+
+<script src="/static/app.js"></script>
+</body>
+</html>
