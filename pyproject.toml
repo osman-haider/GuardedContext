@@ -1,0 +1,16 @@
+[project]
+name = "guardedcontext"
+version = "0.1.0"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.115.0",
+    "uvicorn[standard]>=0.30.6",
+    "pydantic>=2.9.2",
+    "pydantic-settings>=2.5.2",
+    "sqlmodel>=0.0.22",
+    "openai>=1.109.1",
+    "python-dotenv>=1.0.1",
+]
+
+[tool.vercel]
+entrypoint = "backend.app.main:app"
