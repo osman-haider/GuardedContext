@@ -7,7 +7,7 @@ API schemas in the same Pydantic-flavored style used everywhere else in
 this project.
 """
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Generator, Optional
 
 from sqlmodel import Field, Session, SQLModel, create_engine
@@ -33,7 +33,7 @@ engine = create_engine(_database_url, connect_args=_connect_args)
 
 class RunLog(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     session_id: str
     question: str
 
